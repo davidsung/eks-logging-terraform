@@ -1,0 +1,29 @@
+# Allows you to add any pipeline files in /usr/share/logstash/pipeline/
+### ***warn*** there is a hardcoded logstash.conf in the image, override it first
+logstashPipeline:
+  logstash.conf: |
+    input {
+      kinesis {
+        region => "${AWS_REGION}"
+        kinesis_stream_name => "${KINESIS_STREAM_NAME}"
+        codec => json { }
+      }
+    }
+    output {
+      opensearch {
+        hosts => ["https://${ES_ENDPOINT}:443"]
+        index => "log-%{+YYYY.MM.dd}"
+        ssl => true
+        ssl_certificate_verification => false
+      }
+    }
+
+logstashJavaOpts: "-Xmx1g -Xms1g"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "1536Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1536Mi"
