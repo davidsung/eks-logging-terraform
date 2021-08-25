@@ -14,11 +14,12 @@
 Fetch `kinesis-auto-scaling` submodule and build
 ```shell
 git submodule update --init --recursive
-cd modules/kinesis-auto-scaling
+cd modules/kinesis-auto-scaling/golang
+go get
 GOOS=linux go build -o ../main scale.go
 ```
 
-## Provision VPC, EKS, Kinesis, AES using Terraform
+## Provision VPC, EKS, Kinesis, AES infrastructure using Terraform
 * Customize configuration parameters like Elasticsearch master nodes enable flag (`es_dedicated_master_enabled`), Instance Type (`es_dedicated_master_type`) / number of nodes (`es_dedicated_master_count`), data nodes Instance Type (`es_instance_type`) / number of nodes (`es_instance_count`)
 ```shell
 cp terraform.example.tfvars terraform.tfvars
@@ -35,12 +36,7 @@ Update `kubeconfig`
 aws eks update-kubeconfig --name $(terraform output -raw eks_cluster_id)
 ```
 
-Enable ES cold storage through awscli
-```shell
-aws es update-elasticsearch-domain-config --domain-name $(terraform output -raw es_domain_name) --elasticsearch-cluster-config ColdStorageOptions={Enabled=True}
-```
-
-## Aggregation Layer - Logstash
+## Transformation Layer - Logstash
 ### Install Logstash Helm Chart
 ```sh
 helm repo add elastic https://helm.elastic.co
@@ -58,7 +54,7 @@ helm upgrade --install \
 
 ## Elasticsearch Index Management
 ## ES `Index pattern` and `Index State Management` configuration in Kibana
-Open browser, visit https://`nginx_endpoint`
+Open a browser, visit https://`nginx_endpoint`
 ![Home](misc/kibana-home.png)
 * Add data
   ![Add data](misc/kibana-add-data.png)
@@ -134,7 +130,7 @@ Click `Index Management` on right navigation bar, click `Create Policy`
 ```
 
 ## Work in progress
-* `fluent-bit` configuration tuning, like enabling aggregation, `flush` interval
+* `fluent-bit` configuration tuning, like enabling `aggregation`, `flush` interval
 * `fluentd` necessary? any information enrichment required to implement in fluentd?
 * `kinesis` scaling threshold determination and actual scale in/out testing
 * (optional) `aws-node-termination-handler` for handling spot instance interruption, only applicable if Spot Instance is used
@@ -171,6 +167,7 @@ Click `Index Management` on right navigation bar, click `Create Policy`
 
 ## Amazon Elasticsearch
 [Managing Indices Ultrawarm](https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/ultrawarm.html)
+[Mapping _source field](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-source-field.html)  
 
 ## General Logging
 [Measuring the performance of a logging subsystem in Kubernetes](https://banzaicloud.com/blog/logging-operator-monitoring/)
