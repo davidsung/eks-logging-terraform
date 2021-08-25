@@ -1,0 +1,3 @@
+[submodule "modules/kinesis-auto-scaling"]
+	path = modules/kinesis-auto-scaling
+	url = git@github.com:davidsung/kinesis-auto-scaling.git
